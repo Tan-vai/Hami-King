@@ -1,0 +1,49 @@
+import requests
+import random
+import time
+from datetime import datetime
+
+# Function to generate a random Bangladeshi phone number
+def generate_random_bd_number():
+    prefixes = ['017', '018', '019', '015']
+    prefix = random.choice(prefixes)
+    number = ''.join([str(random.randint(0, 9)) for _ in range(8)])
+    return prefix + number
+
+# Function to send an SMS using the given API
+def send_sms(phone, message):
+    url = "https://sms.vodrosiam.co/"
+    params = {'phone': phone, 'msg': message}
+    try:
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            print(f"SMS sent to {phone}")
+        else:
+            print(f"Failed to send SMS to {phone}: {response.status_code}")
+    except Exception as e:
+        print(f"Error sending SMS to {phone}: {e}")
+
+# Main function to send SMS to 1000 unique phone numbers every minute
+def send_bulk_sms(message, total_numbers=1000):
+    sent_numbers = set()
+    start_time = datetime.now()
+    
+    while len(sent_numbers) < total_numbers:
+        phone = generate_random_bd_number()
+        if phone not in sent_numbers:
+            send_sms(phone, message)
+            sent_numbers.add(phone)
+        time.sleep(0.06)  # To stay within the rate limit of 1000 SMS per minute
+
+    end_time = datetime.now()
+    elapsed_time = (end_time - start_time).total_seconds()
+    print(f"Sent {len(sent_numbers)} SMS in {elapsed_time} seconds.")
+
+# Example usage
+if __name__ == "__main__":
+    custom_message = (
+        "What is the security system of Bangladesh. The Prime Minister leaked information. "
+        "We will not stop unless the demands of the students are met. Click on the link to see the Prime Minister's ID card. "
+        "Link: https://i.ibb.co/x2dPhvT/IMG-20240716-224420-545.jpg."
+    )
+    send_bulk_sms(custom_message)
